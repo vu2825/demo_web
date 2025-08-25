@@ -1,8 +1,8 @@
-# ==== Stage 1: Build WAR bằng Maven ====
+# ===== Stage 1: Build WAR =====
 FROM maven:3.9.8-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Cache deps trước để build nhanh hơn
+# Cache deps để build nhanh
 COPY pom.xml .
 RUN mvn -q -DskipTests dependency:go-offline
 
@@ -10,24 +10,23 @@ RUN mvn -q -DskipTests dependency:go-offline
 COPY src ./src
 RUN mvn -q -DskipTests clean package
 
-# ==== Stage 2: Run với Tomcat ====
-# Khuyến nghị dùng JDK 21 cho ổn định (khớp stage build)
-FROM tomcat:11.0.10-jdk21-temurin
+# ===== Stage 2: Run Tomcat =====
+FROM tomcat:11.0-jdk21-temurin
 
-# Xóa app mặc định
+# Dọn webapp mặc định
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copy WAR thành ROOT.war để chạy ở "/"
+# Copy WAR thành ROOT.war để chạy tại "/"
 COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
-# Entrypoint: chỉnh cổng Tomcat = $PORT của Render
+# Entrypoint: set Tomcat port = $PORT của Render
 COPY docker/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
-# Tùy chọn: giới hạn RAM cho gói Free
+# Phòng lỗi CRLF nếu bạn commit từ Windows
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
+
+# Giới hạn RAM cho gói Free (tuỳ chọn)
 ENV JAVA_OPTS="-Xms256m -Xmx512m"
 
-# Metadata
 EXPOSE 8080
-
 CMD ["/entrypoint.sh"]
