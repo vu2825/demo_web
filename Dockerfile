@@ -1,32 +1,28 @@
-# ===== Stage 1: Build WAR =====
-FROM maven:3.9.8-eclipse-temurin-21 AS build
+# ---------- Stage 1: Build WAR ----------
+FROM maven:3.9.11-eclipse-temurin-21 AS builder
 WORKDIR /app
 
-# Cache deps để build nhanh
+# Tối ưu cache: tải deps trước
 COPY pom.xml .
 RUN mvn -q -DskipTests dependency:go-offline
 
 # Copy source và build
 COPY src ./src
-RUN mvn -q -DskipTests clean package
+RUN mvn clean package -DskipTests
 
-# ===== Stage 2: Run Tomcat =====
-FROM tomcat:11.0-jdk21-temurin
+# ---------- Stage 2: Tomcat runtime ----------
+FROM tomcat:11.0-jdk24
 
-# Dọn webapp mặc định
+# Xóa webapp mặc định
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copy WAR thành ROOT.war để chạy tại "/"
-COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
-
-# Entrypoint: set Tomcat port = $PORT của Render
-COPY docker/entrypoint.sh /entrypoint.sh
-
-# Phòng lỗi CRLF nếu bạn commit từ Windows
-RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
-
-# Giới hạn RAM cho gói Free (tuỳ chọn)
-ENV JAVA_OPTS="-Xms256m -Xmx512m"
+# Copy WAR thành ROOT.war để chạy ở /
+# (Đổi demo_web.war nếu bạn đặt finalName khác)
+COPY --from=builder /app/target/demo_web.war /usr/local/tomcat/webapps/ROOT.war
 
 EXPOSE 8080
-CMD ["/entrypoint.sh"]
+
+# (Tùy chọn) chạy user không phải root
+# USER 1001
+
+CMD ["catalina.sh", "run"]
