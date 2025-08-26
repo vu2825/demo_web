@@ -1,26 +1,25 @@
-# ---------- Stage 1: Build WAR ----------
+# Stage 1: Build WAR bằng Maven
 FROM maven:3.9.8-eclipse-temurin-21 AS builder
 WORKDIR /app
 
-# Tối ưu cache: tải deps trước
+# Copy pom.xml và src để Maven build
 COPY pom.xml .
-RUN mvn -q -DskipTests dependency:go-offline
-
-# Copy source và build
 COPY src ./src
+
+# Build file WAR
 RUN mvn clean package -DskipTests
 
-# ---------- Stage 2: Tomcat runtime ----------
+# Stage 2: Run với Tomcat
 FROM tomcat:10.1-jdk21
 
-# Xóa webapp mặc định
+# Xóa webapp mặc định của Tomcat
 RUN rm -rf /usr/local/tomcat/webapps/*
 
-# Copy WAR thành ROOT.war để chạy ở /
-# (Đổi demo_web.war nếu bạn đặt finalName khác)
-# WAR của bạn là demo.war (theo README)
-COPY --from=builder /app/target/demo.war /usr/local/tomcat/webapps/demo.war
+# Copy WAR từ stage 1 vào Tomcat
+COPY --from=builder /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
 
+# Expose cổng
 EXPOSE 8080
 
+# Chạy Tomcat
 CMD ["catalina.sh", "run"]
