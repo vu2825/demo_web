@@ -23,7 +23,4 @@ COPY --from=builder /app/target/demo.war /usr/local/tomcat/webapps/demo.war
 
 EXPOSE 8080
 
-# (Tùy chọn) chạy user không phải root
-# USER 1001
-
 CMD ["catalina.sh", "run"]

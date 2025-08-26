@@ -8,8 +8,10 @@
   <packaging>war</packaging>
 
   <properties>
-    <maven.compiler.release>24</maven.compiler.release>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>21</maven.compiler.release>
+    <!-- 2 dòng dưới không bắt buộc khi đã có release, nhưng thêm cũng OK -->
+    <maven.compiler.source>21</maven.compiler.source>
+    <maven.compiler.target>21</maven.compiler.target>
   </properties>
 
   <dependencies>
@@ -33,11 +35,10 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-war-plugin</artifactId>
-        <version>3.4.0</version>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.13.0</version>
         <configuration>
-          <failOnMissingWebXml>false</failOnMissingWebXml>
-          <warName>demo</warName>
+          <release>21</release>
         </configuration>
       </plugin>
     </plugins>
