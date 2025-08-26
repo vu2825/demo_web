@@ -18,7 +18,8 @@ RUN rm -rf /usr/local/tomcat/webapps/*
 
 # Copy WAR thành ROOT.war để chạy ở /
 # (Đổi demo_web.war nếu bạn đặt finalName khác)
-COPY --from=builder /app/target/demo_web.war /usr/local/tomcat/webapps/ROOT.war
+# WAR của bạn là demo.war (theo README)
+COPY --from=builder /app/target/demo.war /usr/local/tomcat/webapps/ROOT.war
 
 EXPOSE 8080
 
