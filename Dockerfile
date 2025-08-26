@@ -11,7 +11,7 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # ---------- Stage 2: Tomcat runtime ----------
-FROM tomcat:11.0-jdk24
+FROM tomcat:10.1-jdk21
 
 # Xóa webapp mặc định
 RUN rm -rf /usr/local/tomcat/webapps/*
